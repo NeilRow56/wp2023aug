@@ -1,14 +1,22 @@
-import { Button } from "@/components/ui/button";
+"use client"
 
-export default function Home() {
-    return (
-      <main className="bg-blue-900 w-screen h-screen flex items-center">
-       <div className="text-center w-full">
-         <Button size="lg" variant="destructive">
-            Click Me
-         </Button>
-       </div>
-     </main>
-  
-    )
-  }
+import { useEffect } from "react"
+
+import { useAuthModal } from "@/hooks/use-auth-modal"
+
+
+
+const HomePage = () => {
+  const onOpen = useAuthModal((state) => state.onOpen)
+  const isOpen = useAuthModal((state) => state.isOpen)
+
+  useEffect(() => {
+    if(!isOpen) {
+      onOpen()
+    }
+  }, [ isOpen, onOpen])
+
+  return  null
+}
+
+export default HomePage
