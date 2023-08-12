@@ -1,15 +1,22 @@
+"use client"
 
+import { useEffect } from "react"
+
+import { useAuthModal } from "@/hooks/use-auth-modal"
 
 
 
 const Dashboard = () => {
- 
+  const onOpen = useAuthModal((state) => state.onOpen)
+  const isOpen = useAuthModal((state) => state.isOpen)
 
-  return  (
-    <div>
-      <h2>Dashboard Page</h2>
-    </div>
-  )
+  useEffect(() => {
+    if(!isOpen) {
+      onOpen()
+    }
+  }, [ isOpen, onOpen])
+
+  return  null
 }
 
 export default Dashboard

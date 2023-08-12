@@ -1,22 +1,22 @@
-"use client"
-
-import { useEffect } from "react"
-
-import { useAuthModal } from "@/hooks/use-auth-modal"
+import { buttonVariants } from "@/components/ui/button"
+import Link from "next/link"
 
 
+const HomePage
+ = () => {
 
-const HomePage = () => {
-  const onOpen = useAuthModal((state) => state.onOpen)
-  const isOpen = useAuthModal((state) => state.isOpen)
 
-  useEffect(() => {
-    if(!isOpen) {
-      onOpen()
-    }
-  }, [ isOpen, onOpen])
-
-  return  null
-}
-
-export default HomePage
+  return  (
+    <main className=" w-screen h-screen flex items-center">
+      <div className="text-center w-full space-y-8" >
+      <h2>Welcome Page</h2>
+      <Link href='/dashboard' className={buttonVariants({ variant: "outline" })}>
+        Dashboard/Register
+      </Link>
+      </div>
+    </main>
+  )
+ }
+ 
+ 
+ export default HomePage
