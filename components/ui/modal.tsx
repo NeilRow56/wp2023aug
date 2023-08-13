@@ -28,7 +28,7 @@ export const Modal: React.FC<ModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-blue-800 font-bold mb-2 text-2xl">{title}</DialogTitle>
           <DialogDescription>
             {description}
           </DialogDescription>
