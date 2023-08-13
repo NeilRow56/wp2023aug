@@ -1,15 +1,19 @@
 "use client"
 
+import axios from "axios";
+import { signIn, useSession } from 'next-auth/react'
 import * as z from "zod"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from "next/navigation";
 
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input";
 import { useAuthModal } from "@/hooks/use-auth-modal"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-hot-toast";
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -29,8 +33,17 @@ const FormSchema = z
   });
 
 export const AuthModal = () => {
+    const session = useSession()
     const authModal = useAuthModal()
     const [variant, setVariant] = useState<Variant>('LOGIN');
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+      if (session?.status === 'authenticated') {
+        router.push('/client')
+      }
+    }, [session?.status, router]);
 
     const toggleVariant = useCallback(() => {
       if (variant === 'LOGIN') {
@@ -51,8 +64,52 @@ export const AuthModal = () => {
       });
 
     const onSubmit = async (values: z.infer<typeof FormSchema> ) => {
-        console.log(values)
-        // TODO Register User
+        
+        // Register User
+
+        setIsLoading(true);
+  
+        if (variant === 'REGISTER') {
+          axios.post('/api/register', values)
+          .then(() => signIn('credentials', {
+            ...values,
+            redirect: false,
+          }))
+          .then((callback) => {
+            if (callback?.error) {
+              toast.error('Invalid credentials!');
+            }
+    
+            if (callback?.ok) {
+              router.refresh();
+              router.push('/client')
+              toast.success('Account registered.');
+                         
+
+            }
+          })
+          .catch(() => toast.error('Something went wrong!'))
+          .finally(() => setIsLoading(false))
+        }
+    
+        if (variant === 'LOGIN') {
+          signIn('credentials', {
+            ...values,
+            redirect: false
+          })
+          .then((callback) => {
+            if (callback?.error) {
+              toast.error('Invalid credentials!');
+            }
+    
+            if (callback?.ok) {
+              router.push('/client')
+            }
+          })
+          .finally(() => setIsLoading(false))
+        }
+
+
     }
 
     return (
@@ -79,7 +136,7 @@ export const AuthModal = () => {
                 <FormItem>
                   <FormLabel className="text-blue-800" >Name</FormLabel>
                   <FormControl>
-                    <Input   placeholder="Testing" {...field} />
+                    <Input  disabled={isLoading}  placeholder="Testing" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -94,7 +151,7 @@ export const AuthModal = () => {
                     <FormItem>
                       <FormLabel className="text-blue-800">Email</FormLabel>
                       <FormControl>
-                        <Input  placeholder="testing@bt.com" {...field} />
+                        <Input disabled={isLoading}  placeholder="testing@bt.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -110,7 +167,7 @@ export const AuthModal = () => {
                 <FormItem>
                   <FormLabel className="text-blue-800">Password</FormLabel>
                   <FormControl>
-                    <Input type='password'  placeholder="Enter your password" {...field} />
+                    <Input disabled={isLoading} type='password'  placeholder="Enter your password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +182,7 @@ export const AuthModal = () => {
                 <FormItem>
                   <FormLabel className="text-blue-800">Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type='password'   placeholder="Confirm password" {...field} />
+                    <Input disabled={isLoading} type='password'   placeholder="Confirm password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,11 +190,11 @@ export const AuthModal = () => {
             />
             </div>
                 <div className="pt-6 space-x-2 flex items-center justify-end w-full">
-                  <Button variant="outline" onClick={authModal.onClose}>
+                  <Button  variant="outline" onClick={authModal.onClose}>
                     Cancel
                   </Button>
                   
-            <Button  className="w-full bg-blue-800 hover:bg-blue-500" type="submit">
+            <Button disabled={isLoading}  className="w-full bg-blue-800 hover:bg-blue-500" type="submit">
               {variant === 'LOGIN' ? 'Sign in' : 'Register'}
             </Button>
           
