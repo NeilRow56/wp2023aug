@@ -1,6 +1,10 @@
 "use client"
 
-import AuthForm from "../components/auth-form"
+import { SignUpForm } from "../components/signup-form"
+
+
+
+// // import AuthForm from "../components/auth-form"
 
 // import { useEffect } from "react"
 
@@ -25,13 +29,13 @@ import AuthForm from "../components/auth-form"
 
 
 
-const DashboardPagepage = () => {
+const DashboardPage = () => {
   return (
-    <>
-      <AuthForm />
-    </>
+    <div>
+      Dashboard Page
+    </div>
   )
 }
 
-export default DashboardPagepage
+export default DashboardPage
 

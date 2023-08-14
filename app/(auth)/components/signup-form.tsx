@@ -8,14 +8,15 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 
-import { Modal } from "@/components/ui/modal"
+
 import { Input } from "@/components/ui/input";
-import { useAuthModal } from "@/hooks/use-auth-modal"
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
-type Variant = 'LOGIN' | 'REGISTER';
+
 
 const FormSchema = z
   .object({
@@ -32,10 +33,8 @@ const FormSchema = z
     message: 'Password do not match',
   });
 
-export const AuthModal = () => {
-    const session = useSession()
-    const authModal = useAuthModal()
-    const [variant, setVariant] = useState<Variant>('LOGIN');
+export const SignUpForm = () => {
+    const session = useSession()   
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
@@ -45,13 +44,7 @@ export const AuthModal = () => {
       }
     }, [session?.status, router]);
 
-    const toggleVariant = useCallback(() => {
-      if (variant === 'LOGIN') {
-        setVariant('REGISTER');
-      } else {
-        setVariant('LOGIN');
-      }
-    }, [variant]);
+    
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -69,9 +62,9 @@ export const AuthModal = () => {
 
         setIsLoading(true);
   
-        if (variant === 'REGISTER') {
-          axios.post('/api/register', values)
-          .then(() => signIn('credentials', {
+        
+          await axios.post('/api/register', values)
+          .then(() =>  signIn('credentials', {
             ...values,
             redirect: false,
           }))
@@ -90,43 +83,37 @@ export const AuthModal = () => {
           })
           .catch(() => toast.error('Something went wrong!'))
           .finally(() => setIsLoading(false))
-        }
-    
-        if (variant === 'LOGIN') {
-          signIn('credentials', {
-            ...values,
-            redirect: false
-          })
-          .then((callback) => {
-            if (callback?.error) {
-              toast.error('Invalid credentials!');
-            }
-    
-            if (callback?.ok) {
-              router.push('/client')
-            }
-          })
-          .finally(() => setIsLoading(false))
-        }
+          
+       
 
 
     }
 
     return (
-        <Modal
-   title="Signin"
-   description="Signin to access client files"
-   isOpen={authModal.isOpen}
-   onClose={authModal.onClose}
-
-   
-   >
-    <div>
-    <div className="  py-2 pb-4">
+        < >
+    
+    <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        
+      <div 
+        className="
+        bg-white
+          px-4
+          py-8
+          shadow
+          sm:rounded-lg
+          sm:px-10
+        "
+      >
+        <div className="text-blue-800 font-bold mb-2 text-2xl">
+            <h2>Signin</h2>
+        </div>
+        <div className="text-gray-400  mb-2 ">
+            <h3>Signin to access client files</h3>
+        </div>
     <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
 
-              {variant === 'REGISTER' && (
+             
              <div className="p-3 ">    
               <FormField
             
@@ -134,7 +121,7 @@ export const AuthModal = () => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-800" >Name</FormLabel>
+                  <FormLabel className="text-blue-800 font-semibold" >Name</FormLabel>
                   <FormControl>
                     <Input  disabled={isLoading}  placeholder="Testing" {...field} />
                   </FormControl>
@@ -143,13 +130,13 @@ export const AuthModal = () => {
               )}
             />
             </div>
-            )}
+            
             <div className="p-3">                <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-blue-800">Email</FormLabel>
+                      <FormLabel className="text-blue-800 font-semibold">Email</FormLabel>
                       <FormControl>
                         <Input disabled={isLoading}  placeholder="testing@bt.com" {...field} />
                       </FormControl>
@@ -165,7 +152,7 @@ export const AuthModal = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-800">Password</FormLabel>
+                  <FormLabel className="text-blue-800 font-semibold">Password</FormLabel>
                   <FormControl>
                     <Input disabled={isLoading} type='password'  placeholder="Enter your password" {...field} />
                   </FormControl>
@@ -174,14 +161,14 @@ export const AuthModal = () => {
               )}
             />
             </div>
-            {variant === 'REGISTER' && (
+            
             <div className="p-3"> 
                 <FormField
               control={form.control}
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-800">Confirm Password</FormLabel>
+                  <FormLabel className="text-blue-800 font-semibold">Confirm Password</FormLabel>
                   <FormControl>
                     <Input disabled={isLoading} type='password'   placeholder="Confirm password" {...field} />
                   </FormControl>
@@ -190,14 +177,11 @@ export const AuthModal = () => {
               )}
             />
             </div>
-            )}
+            
                 <div className="pt-6 space-x-2 flex items-center justify-end w-full">
-                  <Button  variant="outline" onClick={authModal.onClose}>
-                    Cancel
-                  </Button>
                   
             <Button disabled={isLoading}  className="w-full bg-blue-800 hover:bg-blue-500" type="submit">
-              {variant === 'LOGIN' ? 'Sign in' : 'Register'}
+             Register
             </Button>
           
                 </div>
@@ -216,20 +200,18 @@ export const AuthModal = () => {
             text-gray-500
           "
         >
-          <div>
-            {variant === 'LOGIN' ? 'New to WPfile?' : 'Already have an account?'} 
-          </div>
-          <div 
-            onClick={toggleVariant} 
-            className="underline cursor-pointer"
-          >
-            {variant === 'LOGIN' ? 'Create an account' : 'Login'}
-          </div>
+          <p className='text-center text-sm text-gray-600 mt-2'>
+        If you already have an account, please&nbsp;
+        <Link className='text-blue-500 hover:underline' href='/sign-in'>
+          Sign in
+        </Link>
+      </p>
             </div>
           </div>
         </div>
         </div>
-   </Modal>
+        
+   </>
     )
    
 
